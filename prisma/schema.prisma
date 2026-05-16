@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  RIDER
+  ADMIN
+}
+
+enum TripStatus {
+  SEARCHING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  phone     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  riderProfile RiderProfile?
+  trips        Trip[]        @relation("CustomerTrips")
+}
+
+model RiderProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  plateNumber String   @unique
+  rating      Float    @default(5.0)
+  isOnline    Boolean  @default(false)
+  
+  // Relations
+  trips       Trip[]   @relation("RiderTrips")
+}
+
+model Trip {
+  id                String     @id @default(uuid())
+  customerId        String?
+  customer          User?      @relation("CustomerTrips", fields: [customerId], references: [id])
+  riderId           String?
+  rider             RiderProfile? @relation("RiderTrips", fields: [riderId], references: [id])
+  
+  guestName         String?
+  guestPhone        String?
+  
+  pickupLocation    String
+  destination       String
+  price             Decimal    @db.Decimal(10, 2)
+  status            TripStatus @default(SEARCHING)
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}

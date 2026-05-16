@@ -1,0 +1,58 @@
+version: '3.8'
+
+# ============================================================
+# BodaConnect - Full Stack Docker Compose
+#
+# Docker Hub Images (codewithmac):
+#   - codewithmac/bodaboda-frontend:latest  (Next.js unified app - Frontend + API)
+#   - codewithmac/bodaboda-backend:latest   (Express standalone API)
+#   - codewithmac/bodaboda-db:latest        (PostgreSQL database)
+# ============================================================
+
+services:
+
+  # ---- Unified Next.js App (Frontend + API Routes) ----
+  app:
+    image: codewithmac/bodaboda-frontend:latest
+    container_name: bodaboda-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://default:CateX3QI2rJH@ep-snowy-bread-a49jrays-pooler.us-east-1.aws.neon.tech/BodaBodaApp?sslmode=require&channel_binding=require
+      - JWT_SECRET=boda-secret123
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # ---- Standalone Express Backend ----
+  backend:
+    image: codewithmac/bodaboda-backend:latest
+    container_name: bodaboda-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://default:CateX3QI2rJH@ep-snowy-bread-a49jrays-pooler.us-east-1.aws.neon.tech/BodaBodaApp?sslmode=require&channel_binding=require
+      - JWT_SECRET=boda-secret123
+    command: sh -c "npx prisma db push && npm start"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # ---- PostgreSQL Database ----
+  db:
+    image: codewithmac/bodaboda-db:latest
+    container_name: bodaboda-db
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=bodaboda
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
