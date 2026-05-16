@@ -4,7 +4,11 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(req: Request) {
   try {
-    const { phone, password, name, role } = await req.json();
+    const body = await req.json();
+    const { phone, password, name, role } = body;
+
+    console.log('Registering user:', phone);
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const user = await prisma.user.create({
@@ -25,8 +29,25 @@ export async function POST(req: Request) {
       });
     }
 
+    console.log('User created:', user.id);
     return NextResponse.json({ message: 'User created successfully', userId: user.id }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    console.error('REGISTRATION ERROR:', error);
+    return NextResponse.json({ 
+      error: 'Registration failed',
+      message: error.message 
+    }, { status: 400 });
   }
+}
+
+// Handle OPTIONS for CORS
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
 }
