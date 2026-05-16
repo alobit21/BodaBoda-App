@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://boda-boda-app-8dcf-ddc302g4b-aloyce-mtavangus-projects.vercel.app/api/:path*"
+    }
+  ]
+}
