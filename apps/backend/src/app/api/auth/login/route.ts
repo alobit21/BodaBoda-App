@@ -10,43 +10,35 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { phone, password } = body;
 
-    if (!phone || !password) {
-      return NextResponse.json({ error: 'Phone and password are required' }, { status: 400 });
-    }
-
-    console.log('Attempting login for phone:', phone);
+    console.log('Login attempt for:', phone);
 
     const user = await prisma.user.findUnique({ where: { phone } });
     
     if (!user) {
-      console.log('User not found:', phone);
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ error: 'User not found' }, { status: 401 });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      console.log('Invalid password for user:', phone);
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
     
-    console.log('Login successful for user:', phone);
-
     return NextResponse.json({ 
       token, 
       user: { id: user.id, phone: user.phone, role: user.role, name: user.name } 
     });
   } catch (error: any) {
-    console.error('CRITICAL LOGIN ERROR:', error);
+    // THIS WILL SHOW US THE ERROR IN THE BROWSER NETWORK TAB
     return NextResponse.json({ 
-      error: 'Internal server error',
-      details: error.message 
+      error: 'Backend Crash',
+      message: error.message,
+      stack: error.stack 
     }, { status: 500 });
   }
 }
 
-// Handle OPTIONS for CORS (just in case middleware is bypassed)
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
