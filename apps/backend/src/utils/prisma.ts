@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+// Use the custom generated client from the shared packages/db folder
+// This avoids the ENOENT errors on Vercel caused by node_modules hoisting
+import { PrismaClient } from '../../../../packages/db/client';
 
 const prismaClientSingleton = () => {
   return new PrismaClient();
