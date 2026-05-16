@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Only use standalone output for Docker builds, not on Vercel
+  output: process.env.VERCEL ? undefined : 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
