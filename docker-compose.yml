@@ -1,48 +1,38 @@
 version: '3.8'
 
-# ============================================================
-# BodaConnect - Full Stack Docker Compose
-#
-# Docker Hub Images (codewithmac):
-#   - codewithmac/bodaboda-frontend:latest  (Next.js unified app - Frontend + API)
-#   - codewithmac/bodaboda-backend:latest   (Express standalone API)
-#   - codewithmac/bodaboda-db:latest        (PostgreSQL database)
-# ============================================================
-
 services:
-
-  # ---- Unified Next.js App (Frontend + API Routes) ----
-  app:
-    image: codewithmac/bodaboda-frontend:latest
-    container_name: bodaboda-app
+  # ---- Frontend UI (Next.js) ----
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    container_name: bodaboda-frontend
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://default:CateX3QI2rJH@ep-snowy-bread-a49jrays-pooler.us-east-1.aws.neon.tech/BodaBodaApp?sslmode=require&channel_binding=require
-      - JWT_SECRET=boda-secret123
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:4000/api
     depends_on:
-      - db
-    restart: unless-stopped
+      - backend
 
-  # ---- Standalone Express Backend ----
+  # ---- Backend API (Next.js) ----
   backend:
-    image: codewithmac/bodaboda-backend:latest
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
     container_name: bodaboda-backend
     ports:
       - "4000:4000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - DATABASE_URL=postgresql://default:CateX3QI2rJH@ep-snowy-bread-a49jrays-pooler.us-east-1.aws.neon.tech/BodaBodaApp?sslmode=require&channel_binding=require
-      - JWT_SECRET=boda-secret123
-    command: sh -c "npx prisma db push && npm start"
+      - JWT_SECRET=super123
     depends_on:
       - db
-    restart: unless-stopped
 
-  # ---- PostgreSQL Database ----
+  # ---- Local Database (for dev) ----
   db:
-    image: codewithmac/bodaboda-db:latest
+    image: postgres:15-alpine
     container_name: bodaboda-db
     environment:
       - POSTGRES_USER=user
@@ -52,7 +42,6 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
 
 volumes:
   postgres_data:

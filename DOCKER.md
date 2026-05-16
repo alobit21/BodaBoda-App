@@ -70,15 +70,7 @@ bodaboda-app/
 │   └── utils/
 │       ├── api.ts               # Frontend fetch wrapper
 │       └── prisma.ts            # Prisma singleton client
-├── backend/                     # Standalone Express backend
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── prisma/
-│   │   └── schema.prisma
-│   └── src/
-│       └── index.ts             # Express app (auth + trips endpoints)
-└── db/
-    └── Dockerfile               # Custom PostgreSQL image
+└── README.md
 ```
 
 ---
